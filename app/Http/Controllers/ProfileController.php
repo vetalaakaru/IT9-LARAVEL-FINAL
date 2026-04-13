@@ -8,36 +8,32 @@ class ProfileController extends Controller
 {
     public function index()
     {
-        $profiles = session('profiles', []);
+        $profiles = session()->get('profiles', []);
         return view('welcome', compact('profiles'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'age' => 'required|integer|min:1',
-            'program' => 'required|string|max:255',
+            'name' => 'required|string',
+            'age' => 'required|integer',
+            'program' => 'required|string',
             'email' => 'required|email',
-            'gender' => 'required|in:male,female',
+            'gender' => 'required',
             'hobbies' => 'required|array|min:5',
-            'bio' => 'required|string|max:500',
+            'bio' => 'required|string',
         ]);
 
-        $profiles = session('profiles', []);
+        $profiles = session()->get('profiles', []);
         $profiles[] = $validated;
-        
-        session(['profiles' => $profiles]);
-        session()->save(); 
+        session()->put('profiles', $profiles);
 
-        return redirect('/');
+        return redirect('/')->with('success', 'Profile added!');
     }
 
     public function clear()
     {
         session()->forget('profiles');
-        session()->save();
-        
         return redirect('/');
     }
 }
