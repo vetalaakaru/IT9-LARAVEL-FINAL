@@ -20,7 +20,7 @@ class ProfileController extends Controller
             'program' => 'required|string',
             'email' => 'required|email',
             'gender' => 'required',
-            'hobbies' => 'required|array|min:5',
+            'hobbies' => 'required|array|min:1',            
             'bio' => 'required|string',
         ]);
 
