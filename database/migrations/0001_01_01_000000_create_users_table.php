@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
@@ -17,10 +14,21 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            
+            // Unified Role and Status
+            $table->string('role')->default('buyer'); // Using 'buyer' consistently
+            $table->string('status')->default('pending'); // For Admin approval
+            
+            // Seller/Merchant Fields
+            $table->string('shop_name')->nullable();
+            $table->string('owner_name')->nullable(); // Matches AdminController logic
+            $table->string('valid_id')->nullable(); // For file uploads
+            
             $table->rememberToken();
             $table->timestamps();
         });
 
+        // Keep the default password_reset_tokens and sessions tables below...
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
@@ -37,9 +45,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('users');
