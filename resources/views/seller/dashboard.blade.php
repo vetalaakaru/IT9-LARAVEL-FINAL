@@ -1,96 +1,122 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seller Center | CraveCart</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body { font-family: 'Poppins', sans-serif; margin: 0; background: #f4f7f6; display: flex; }
-        .sidebar { width: 250px; background: #2c3e50; color: white; min-height: 100vh; padding: 20px; }
-        .main-content { flex: 1; padding: 30px; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .btn-add { background: #ff6b00; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #ddd; }
-        .status-badge { padding: 5px 10px; border-radius: 15px; font-size: 0.8rem; }
-        .status-pending { background: #ffeaa7; color: #d6a011; }
-    </style>
-</head>
-<body>
+<x-layout>
+<div style="display: flex; min-height: 100vh; background: #f3e3eb; font-family: 'Poppins', sans-serif;">
+    
+    <aside style="width: 280px; background: #ff4a00; color: white; padding: 40px 20px; position: fixed; height: 100vh;">
+        <h2 style="font-family: serif; text-align: center; font-size: 2rem; margin-bottom: 40px;">CraveCart</h2>
+        <nav style="display: flex; flex-direction: column; gap: 10px;">
+            <button onclick="show('products')" id="nav-products" class="nav-link active">Inventory</button>
+            <button onclick="show('orders')" id="nav-orders" class="nav-link">Orders</button>
+            <button onclick="show('messages')" id="nav-messages" class="nav-link">Messages</button>
+        </nav>
+    </aside>
 
-<div class="sidebar">
-    <h2>🛒 Seller Center</h2>
-    <p>Welcome, {{ Auth::user()->name }}</p>
-    <hr>
-    <ul style="list-style: none; padding: 0;">
-        <li style="padding: 10px 0;"><a href="#" style="color: white; text-decoration: none;"><i class="fas fa-box"></i> My Products</a></li>
-        <li style="padding: 10px 0;"><a href="#" style="color: white; text-decoration: none;"><i class="fas fa-shopping-cart"></i> Orders</a></li>
-        <li style="padding: 10px 0;"><a href="{{ route('buyer.messages') }}" style="color: white; text-decoration: none;"><i class="fas fa-comments"></i> Messages</a></li>
-    </ul>
-    <form action="{{ route('logout') }}" method="POST" style="margin-top: 50px;">
-        @csrf
-        <button type="submit" style="background: none; border: 1px solid white; color: white; cursor: pointer; width: 100%; padding: 10px;">Logout</button>
-    </form>
+    <main style="flex: 1; margin-left: 280px; padding: 40px;">
+        <section id="sec-products" class="tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <h1 style="color: #dd0d22; margin: 0;">My Products</h1>
+                <button onclick="openAddModal()" style="background: #dd0d22; color: white; border: none; padding: 12px 25px; border-radius: 10px; cursor: pointer; font-weight: bold;">+ Add Product</button>
+            </div>
+
+            <div style="background: white; border-radius: 20px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr style="text-align: left; border-bottom: 2px solid #f3e3eb; color: #ff4a00;">
+                        <th style="padding: 15px;">Item</th>
+                        <th style="padding: 15px;">Price</th>
+                        <th style="padding: 15px;">Category</th>
+                        <th style="padding: 15px; text-align: center;">Actions</th>
+                    </tr>
+                    @foreach($products as $product)
+                    <tr style="border-bottom: 1px solid #f3e3eb;">
+                        <td style="padding: 15px;">{{ $product->name }}</td>
+                        <td style="padding: 15px; font-weight: bold; color: #dd0d22;">₱{{ number_format($product->price, 2) }}</td>
+                        <td style="padding: 15px;">{{ $product->category }}</td>
+                        <td style="padding: 15px; text-align: center; display: flex; justify-content: center; gap: 10px;">
+                            <button onclick="openEditModal({{ $product }})" style="background: none; border: none; color: #3498db; cursor: pointer;"><i class="fas fa-edit"></i></button>
+                            
+                            <form action="{{ route('seller.product.delete', $product->id) }}" method="POST" onsubmit="return confirm('Are you sure?')">
+                                @csrf @method('DELETE')
+                                <button type="submit" style="background: none; border: none; color: #ff4a00; cursor: pointer;"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    @endforeach
+                </table>
+            </div>
+        </section>
+    </main>
 </div>
 
-<div class="main-content">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h1>Inventory Management</h1>
-        <button class="btn-add" onclick="document.getElementById('addModal').style.display='block'">+ Add New Product</button>
-    </div>
-
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px;">
-        <div class="card"><h3>Total Orders</h3><p style="font-size: 2rem;">12</p></div>
-        <div class="card"><h3>Active Products</h3><p style="font-size: 2rem;">05</p></div>
-        <div class="card"><h3>Revenue</h3><p style="font-size: 2rem;">₱4,500</p></div>
-    </div>
-
-    <div class="card">
-        <h3>My Items</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Image</th>
-                    <th>Product Name</th>
-                    <th>Stock</th>
-                    <th>Price</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><img src="/images/rice.jpg" width="50" style="border-radius: 5px;"></td>
-                    <td>Premium Sinandomeng</td>
-                    <td>45 kgs</td>
-                    <td>₱250.00</td>
-                    <td>
-                        <button style="border: none; background: #3498db; color: white; padding: 5px 10px; border-radius: 3px;">Edit</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<div id="addModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);">
-    <div style="background: white; width: 400px; margin: 100px auto; padding: 20px; border-radius: 10px;">
-        <h2>Add Product</h2>
+<div id="addModal" class="modal-bg">
+    <div class="modal-content">
+        <h2 style="color: #dd0d22;">New Essential Item</h2>
         <form action="{{ route('seller.product.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
-            <label>Name</label><br>
-            <input type="text" name="name" style="width: 100%; margin-bottom: 10px;" required><br>
-            <label>Price (₱)</label><br>
-            <input type="number" name="price" style="width: 100%; margin-bottom: 10px;" required><br>
-            <label>Stock Quantity</label><br>
-            <input type="number" name="stock" style="width: 100%; margin-bottom: 10px;" required><br>
-            <label>Product Image</label><br>
-            <input type="file" name="image" style="margin-bottom: 20px;"><br>
-            <button type="submit" class="btn-add">Save Product</button>
-            <button type="button" onclick="document.getElementById('addModal').style.display='none'" style="background: #ccc; border: none; padding: 10px;">Cancel</button>
+            <input type="text" name="name" placeholder="Product Name" class="form-input" required>
+            <input type="number" name="price" placeholder="Price" class="form-input" required>
+            <select name="category" class="form-input">
+                <option>Groceries</option>
+                <option>Household</option>
+                <option>Personal Care</option>
+            </select>
+            <input type="file" name="image" style="margin-bottom: 20px;">
+            <div style="display:flex; gap:10px;">
+                <button type="submit" style="flex:2; background: #dd0d22; color: white; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">Save</button>
+                <button type="button" onclick="closeModal('addModal')" style="flex:1; background: #eee; padding: 15px; border-radius: 10px; border:none; cursor:pointer;">Cancel</button>
+            </div>
         </form>
     </div>
 </div>
 
-</body>
-</html>
+<div id="editModal" class="modal-bg">
+    <div class="modal-content">
+        <h2 style="color: #dd0d22;">Edit Product</h2>
+        <form id="editForm" method="POST" enctype="multipart/form-data">
+            @csrf @method('POST') <input type="text" name="name" id="edit_name" class="form-input" required>
+            <input type="number" name="price" id="edit_price" class="form-input" required>
+            <select name="category" id="edit_category" class="form-input">
+                <option>Groceries</option>
+                <option>Household</option>
+                <option>Personal Care</option>
+            </select>
+            <input type="file" name="image" style="margin-bottom: 20px;">
+            <div style="display:flex; gap:10px;">
+                <button type="submit" style="flex:2; background: #3498db; color: white; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">Update</button>
+                <button type="button" onclick="closeModal('editModal')" style="flex:1; background: #eee; padding: 15px; border-radius: 10px; border:none; cursor:pointer;">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .modal-bg { display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 100; }
+    .modal-content { background: white; padding: 40px; border-radius: 20px; width: 400px; }
+    .form-input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+    .nav-link { background: none; border: none; color: white; text-align: left; padding: 15px; border-radius: 10px; cursor: pointer; font-size: 1rem; opacity: 0.7; width: 100%; }
+    .nav-link.active { background: #dd0d22; opacity: 1; font-weight: bold; }
+</style>
+
+<script>
+    function show(id) {
+        document.querySelectorAll('.tab-content').forEach(s => s.style.display = 'none');
+        document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+        document.getElementById('sec-' + id).style.display = 'block';
+        document.getElementById('nav-' + id).classList.add('active');
+    }
+
+    function openAddModal() { document.getElementById('addModal').style.display = 'flex'; }
+
+    function openEditModal(product) {
+        document.getElementById('edit_name').value = product.name;
+        document.getElementById('edit_price').value = product.price;
+        document.getElementById('edit_category').value = product.category;
+        
+        // Update the form action URL dynamically
+        const form = document.getElementById('editForm');
+        form.action = `/seller/product/update/${product.id}`;
+        
+        document.getElementById('editModal').style.display = 'flex';
+    }
+
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+</script>
+</x-layout>

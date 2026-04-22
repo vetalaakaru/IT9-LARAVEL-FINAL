@@ -15,8 +15,7 @@ class DatabaseSeeder extends Seeder
         // 1. Run the Admin Seeder first
         $this->call(AdminSeeder::class);
 
-        // 2. Create a default Seller for the Espifior Shop
-        // Use the 'seller' state we defined in the Factory
+       
         User::factory()->seller()->create([
             'name' => 'Espifior Admin',
             'email' => 'merchant@example.com',
@@ -30,11 +29,10 @@ class DatabaseSeeder extends Seeder
             'name' => 'Regular Buyer',
             'email' => 'buyer@example.com',
             'password' => bcrypt('password123'),
-            'role' => 'buyer', // Match migration
+            'role' => 'buyer',
             'status' => 'active',
         ]);
 
-        // 4. Create 10 random buyers for testing
         User::factory(10)->create([
             'role' => 'buyer'
         ]);

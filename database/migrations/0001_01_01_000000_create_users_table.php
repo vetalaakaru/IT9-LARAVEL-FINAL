@@ -22,7 +22,7 @@ return new class extends Migration
             // Seller/Merchant Fields
             $table->string('shop_name')->nullable();
             $table->string('owner_name')->nullable(); // Matches AdminController logic
-            $table->string('valid_id')->nullable(); // For file uploads
+            $table->string('valid_id')->nullable(); 
             
             $table->rememberToken();
             $table->timestamps();
